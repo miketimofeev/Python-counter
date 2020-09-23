@@ -16,17 +16,17 @@ args = parser.parse_args()
 app = Flask(__name__)
 
 connectionstring = "postgresql://{username}:{password}@{host}:5432/{db}".format(username=args.dbusername, password=args.dbpassword, host=args.dbhost, db=args.dbname)
-retries = 2
+retries = 30
 while True:
     try:
         engine = create_engine(connectionstring)
         engine.connect()
         break
-    except exc.OperationalError as connectexc:
+    except Exception as connectexc:
         if retries == 0:
             raise connectexc
         retries -= 1
-        print("can't connect to DB '{db}' on host '{host}', will retry in 1 minute. Retries left {retries}".format(host=args.dbhost, db=args.dbname, retries=retries))
+        print("can't connect to DB '{db}' on host '{host}', will retry in 1 minute. Retries left {retries}.\nThe error is:\n".format(host=args.dbhost, db=args.dbname, retries=retries) + str(connectexc.orig))
         time.sleep(60)
 
 
